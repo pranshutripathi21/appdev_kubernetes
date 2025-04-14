@@ -30,7 +30,7 @@ jobs:
     - name: Apply Kubernetes manifests
       run: |
         kubectl apply -f k8s/
-        kubectl rollout status deployment/my-deployment
+        kubectl rollout status deployment/hello-app
         kubectl get all
 
     - name: Stop Minikube
