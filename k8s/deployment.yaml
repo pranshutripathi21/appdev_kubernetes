@@ -13,7 +13,7 @@ spec:
         app: hello-app
     spec:
       containers:
-      - name: hello-container
-        image: k8s.gcr.io/echoserver:1.4
+      - name: hello-app
+        image: nginx  # Use a known public image
         ports:
-        - containerPort: 8080
+        - containerPort: 80

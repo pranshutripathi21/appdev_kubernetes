@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-on-minikube:
-    runs-on: ubuntu-22.04  # 👈 More stable than 24.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout code
@@ -17,7 +17,7 @@ jobs:
       run: |
         curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
         sudo install minikube-linux-amd64 /usr/local/bin/minikube
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         chmod +x kubectl
         sudo mv kubectl /usr/local/bin/
 
@@ -30,7 +30,8 @@ jobs:
     - name: Apply Kubernetes manifests
       run: |
         kubectl apply -f k8s/
-        kubectl rollout status deployment/hello-app
+        echo "Waiting for deployment rollout..."
+        kubectl rollout status deployment/hello-app || (kubectl describe deployment hello-app && kubectl get pods && kubectl describe pods && exit 1)
         kubectl get all
 
     - name: Stop Minikube
