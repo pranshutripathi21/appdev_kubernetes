@@ -1,0 +1,49 @@
+name: Minikube CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  test-on-minikube:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Docker (if needed)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y docker.io
+
+    - name: Install Minikube
+      run: |
+        curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+    - name: Start Minikube
+      run: |
+        minikube start --driver=docker
+        minikube status
+
+    - name: Apply Kubernetes YAMLs
+      run: |
+        kubectl apply -f k8s/
+
+    - name: Wait for Deployment Rollout
+      run: |
+        kubectl rollout status deployment/hello-app --timeout=120s
+
+    - name: Verify Pods and Services
+      run: |
+        kubectl get pods
+        kubectl get svc
+
+    - name: Stop Minikube
+      if: always()
+      run: |
+        minikube stop
+        minikube delete
